@@ -5,12 +5,15 @@
   import IconRandom from "$lib/components/Icons/IconRandom.svelte"
   import FavoriteButton from "$lib/components/Buttons/FavoriteButton.svelte"
   import SearchModal from "$lib/components/Dles/SearchModal.svelte"
+  import ImportModal from "./ImportModal.svelte"
   import { onMount } from "svelte"
   import { base } from "$app/paths"
   import { useTracking } from "$lib/composables/useTracking"
 
   let loading = true
   let showSearchModal = false
+  let showImportModal = false
+
   $: nonFavorites = $dles.filter(
     (dle) => !$favorites.find((f) => f.name === dle.name),
   )
@@ -59,11 +62,29 @@
     showSearchModal = true;
   }
 
+  function openImportModal(event) {
+    const rect = event.target.closest('button').getBoundingClientRect();
+    modalX = rect.left + rect.width / 2;
+    modalY = rect.bottom - 10;
+
+    showImportModal = true;
+  }
+
+  async function copyToClipboard() {
+    const text = $favorites.map(fav => fav.id.toString(36).padStart(3, '0')).join('');
+    await navigator.clipboard.writeText(text);
+    console.log('copied:', text);
+  }
+
   let modalX = 400;
   let modalY = 200;
 
   function closeSearchModal() {
     showSearchModal = false;
+  }
+
+  function closeImportModal() {
+    showImportModal = false;
   }
 </script>
 
@@ -76,6 +97,18 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
       </svg>
       Add new favorite
+    </button>
+    <button class="btn flex items-center" on:click={openImportModal}>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 12m0 0l4.5-4.5M12 12V3" />
+    </svg>
+      Import favorites
+    </button>
+    <button class="btn flex items-center" on:click={copyToClipboard}>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+      </svg>
+      Export favorites to clipboard
     </button>
   </div>
 
@@ -142,6 +175,10 @@
 
 {#if showSearchModal}
   <SearchModal onClose={closeSearchModal} pageX={modalX} pageY={modalY} />
+{/if}
+
+{#if showImportModal}
+    <ImportModal onClose={closeImportModal} pageX={modalX} pageY={modalY} />
 {/if}
 
 <style lang="postcss">

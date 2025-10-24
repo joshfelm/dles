@@ -21,12 +21,15 @@
   import IconFavoriteOutline from "../Icons/IconFavoriteOutline.svelte"
   import IconFavoriteFilled from "../Icons/IconFavoriteFilled.svelte"
   import IconPlus from "../Icons/IconPlus.svelte"
+  import IconCopy from "../Icons/IconCopy.svelte"
+  import IconImport from "../Icons/IconImport.svelte"
   import IconSort from "../Icons/IconSort.svelte"
   import IconEdit from "../Icons/IconEdit.svelte"
   import IconRandom from "../Icons/IconRandom.svelte"
   import DleGroup from "./DleGroup.svelte"
   import DleGrid from "./DleGrid.svelte"
   import SearchModal from "./SearchModal.svelte"
+  import ImportModal from "./ImportModal.svelte"
   import Sponsors from "../Sponsors.svelte"
   import { enhancedSearch, playRandom } from "$lib/js/utilities"
   import { useTracking } from "$lib/composables/useTracking"
@@ -37,6 +40,7 @@
   let allCards = []
   let favoriteCardIndex = -1
   let showSearchModal = false
+  let showImportModal = false
   let editMode = false
 
   const tracking = useTracking()
@@ -81,6 +85,9 @@
       if (showSearchModal) {
         showSearchModal = false
       }
+      if (showImportModal) {
+        showImportModal = false
+      }
     }
   }
 
@@ -91,8 +98,25 @@
     showSearchModal = true
   }
 
+  function openImportModal(event) {
+    pageX = event.pageX
+    pageY = event.pageY
+    clientY = event.clientY
+    showImportModal = true;
+  }
+
+  async function copyToClipboard() {
+    const text = $favorites.map(fav => fav.id.toString(36).padStart(3, '0')).join('');
+    await navigator.clipboard.writeText(text);
+    console.log('copied:', text);
+  }
+
   function closeSearchModal() {
     showSearchModal = false
+  }
+
+  function closeImportModal() {
+    showImportModal = false
   }
 
   function toggleEditMode() {
@@ -278,6 +302,20 @@
               >
                 <IconPlus />
               </button>
+              <button
+                class="favorites-add-button"
+                on:click={copyToClipboard}
+                title="Copy favorites to clipboard"
+              >
+                <IconCopy />
+              </button>
+              <button
+                class="favorites-add-button"
+                on:click={openImportModal}
+                title="Import favorites"
+              >
+                <IconImport />
+              </button>
             {/if}
             {#if card.data.length > 0}
               <button
@@ -332,6 +370,10 @@
 
 {#if showSearchModal}
   <SearchModal onClose={closeSearchModal} {pageX} {pageY} {clientY} />
+{/if}
+
+{#if showImportModal}
+  <ImportModal onClose={closeImportModal} {pageX} {pageY} {clientY} />
 {/if}
 
 <style lang="postcss">

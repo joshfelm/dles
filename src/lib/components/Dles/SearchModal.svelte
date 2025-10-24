@@ -84,6 +84,7 @@
   }
 
   function toggleFavorite(dle) {
+    console.log("toggling", dle)
     const result = favorites.toggleFavorite(dle)
 
     if (result.success) {
