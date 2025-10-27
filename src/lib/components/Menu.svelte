@@ -1,6 +1,7 @@
 <script>
   import { base } from "$app/paths"
   import Settings from "$lib/components/Settings.svelte"
+  import Export from "$lib/components/Export.svelte"
   import DropdownMenu from "./DropdownMenu.svelte"
   import IconBug from "./Icons/IconBug.svelte"
   import IconGitHub from "./Icons/IconGitHub.svelte"
@@ -16,6 +17,10 @@
   </h2>
 
   <Settings />
+  <h3 class="pb-1 my-1 text-center text-lg border-b border-colorTextSoftest">
+    Import/Export Settings
+  </h3>
+  <Export />
   <h3 class="pb-1 my-1 text-center text-lg border-b border-colorTextSoftest">
     How to help
   </h3>

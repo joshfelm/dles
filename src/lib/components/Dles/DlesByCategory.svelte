@@ -30,7 +30,6 @@
   import DleGroup from "./DleGroup.svelte"
   import DleGrid from "./DleGrid.svelte"
   import SearchModal from "./SearchModal.svelte"
-  import ImportModal from "./ImportModal.svelte"
   import Sponsors from "../Sponsors.svelte"
   import { enhancedSearch, playRandom } from "$lib/js/utilities"
   import { useTracking } from "$lib/composables/useTracking"
@@ -41,9 +40,7 @@
   let allCards = []
   let favoriteCardIndex = -1
   let showSearchModal = false
-  let showImportModal = false
   let editMode = false
-  let copied = false
 
   const tracking = useTracking()
 
@@ -87,9 +84,6 @@
       if (showSearchModal) {
         showSearchModal = false
       }
-      if (showImportModal) {
-        showImportModal = false
-      }
     }
   }
 
@@ -100,28 +94,8 @@
     showSearchModal = true
   }
 
-  function openImportModal(event) {
-    pageX = event.pageX
-    pageY = event.pageY
-    clientY = event.clientY
-    showImportModal = true;
-  }
-
-  async function copyToClipboard() {
-    const text = $favorites.map(fav => fav.id.toString(36).padStart(3, '0')).join('');
-    await navigator.clipboard.writeText(text);
-    copied = true;
-    setTimeout(() => {
-      copied = false;
-    }, 5000);
-  }
-
   function closeSearchModal() {
     showSearchModal = false
-  }
-
-  function closeImportModal() {
-    showImportModal = false
   }
 
   function toggleEditMode() {
@@ -307,24 +281,6 @@
               >
                 <IconPlus />
               </button>
-              <button
-                class="favorites-add-button"
-                on:click={copyToClipboard}
-                title="Copy favorites to clipboard"
-              >
-                {#if copied}
-                  <IconCopied />
-                {:else}
-                  <IconCopy />
-                {/if}
-              </button>
-              <button
-                class="favorites-add-button"
-                on:click={openImportModal}
-                title="Import favorites"
-              >
-                <IconImport />
-              </button>
             {/if}
             {#if card.data.length > 0}
               <button
@@ -379,10 +335,6 @@
 
 {#if showSearchModal}
   <SearchModal onClose={closeSearchModal} {pageX} {pageY} {clientY} />
-{/if}
-
-{#if showImportModal}
-  <ImportModal onClose={closeImportModal} {pageX} {pageY} {clientY} />
 {/if}
 
 <style lang="postcss">
