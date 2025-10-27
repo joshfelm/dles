@@ -22,6 +22,7 @@
   import IconFavoriteFilled from "../Icons/IconFavoriteFilled.svelte"
   import IconPlus from "../Icons/IconPlus.svelte"
   import IconCopy from "../Icons/IconCopy.svelte"
+  import IconCopied from "../Icons/IconCopied.svelte"
   import IconImport from "../Icons/IconImport.svelte"
   import IconSort from "../Icons/IconSort.svelte"
   import IconEdit from "../Icons/IconEdit.svelte"
@@ -42,6 +43,7 @@
   let showSearchModal = false
   let showImportModal = false
   let editMode = false
+  let copied = false
 
   const tracking = useTracking()
 
@@ -108,7 +110,10 @@
   async function copyToClipboard() {
     const text = $favorites.map(fav => fav.id.toString(36).padStart(3, '0')).join('');
     await navigator.clipboard.writeText(text);
-    console.log('copied:', text);
+    copied = true;
+    setTimeout(() => {
+      copied = false;
+    }, 5000);
   }
 
   function closeSearchModal() {
@@ -307,7 +312,11 @@
                 on:click={copyToClipboard}
                 title="Copy favorites to clipboard"
               >
-                <IconCopy />
+                {#if copied}
+                  <IconCopied />
+                {:else}
+                  <IconCopy />
+                {/if}
               </button>
               <button
                 class="favorites-add-button"

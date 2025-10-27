@@ -18,12 +18,17 @@
   const tracking = useTracking()
 
   let importCode = ""
+  let invalidCode = false
+  let response = false
   let newlyToggledInSession = new Set()
   let isTouchDevice = false
+  let addedFavorites = 0
 
   let width = 320
   let baseHeight = 120
-  let maxHeight = 400
+  let maxHeight = 150
+
+  $: currentHeight = response ? maxHeight : baseHeight
 
   $: isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
 
@@ -97,12 +102,22 @@
 
   function processImport(favList) {
     const favs = decodeFavorites(favList);
-    favs.forEach(key => {
-      let newFav = $dles.find(dle => dle.id === Number(key))
-      if (newFav) {
-        addFavorite(newFav)
-      }
-    });
+    addedFavorites = 0;
+    if (/^[a-zA-Z0-9]+$/.test(favList)) {
+      favs.forEach(key => {
+        let newFav = $dles.find(dle => dle.id === Number(key))
+        if (newFav) {
+          if (!favorites.isFavorited(newFav)) {
+            addedFavorites++;
+            response = true;
+          }
+          addFavorite(newFav);
+        }
+      });
+    } else {
+      invalidCode = true;
+      response = true;
+    }
   }
 
   function handleKeydown(event) {
@@ -130,7 +145,7 @@
 
 <div
   class="importPopup"
-  style="left: {adjustedPageX}{typeof adjustedPageX === 'number' ? 'px' : ''}; top: {adjustedPageY}{typeof adjustedPageY === 'number' ? 'px' : ''}; width: {width}px; height: {baseHeight}px; transform: translate({transformX}, {transformY});"
+  style="left: {adjustedPageX}{typeof adjustedPageX === 'number' ? 'px' : ''}; top: {adjustedPageY}{typeof adjustedPageY === 'number' ? 'px' : ''}; width: {width}px; height: {currentHeight}px; transform: translate({transformX}, {transformY});"
   use:clickOutside
   on:click_outside={handleClickOutside}
 >
@@ -150,6 +165,26 @@
       class="import-input"
       use:focusInput
     />
+  </div>
+
+  <div class="import-container" name="import-response">
+    {#if invalidCode}
+      <div class="reponses">
+        <p
+          class="repsonse-item"
+          text-color="red">
+            Invalid code
+        </p>
+      </div>
+    {:else if addedFavorites > 0}
+      <div class="reponses">
+        <p
+          class="repsonse-item"
+          text-color="red">
+            Added {addedFavorites} new favorites!
+        </p>
+      </div>
+    {/if}
   </div>
 </div>
 
@@ -173,6 +208,16 @@
     @apply p-2 border border-colorTextSoftest rounded bg-colorCardB text-colorText placeholder-colorTextSofter focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm;
     width: 80%;
     max-width: 300px;
+  }
+
+  .response-container {
+    @apply flex-1 overflow-y-auto;
+    min-height: 0; /* Important for flex child to shrink */
+  }
+
+  .response-item {
+    @apply flex items-center justify-between p-2 pr-4 rounded cursor-pointer border-none w-full text-left;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
 
 </style>
