@@ -1,10 +1,11 @@
 <script>
-  import { poppedUpDle, newDles, favorites, favoriteIds } from "$lib/stores"
+  import { poppedUpDle, newDles, favorites, favoriteIds, completedIds } from "$lib/stores"
   import { openInNewTab, isLocalStorageAvailable } from "$lib/js/utilities"
   import { useTracking } from "$lib/composables/useTracking.js"
   import DlePopUp from "./DlePopUp.svelte"
   import IconNew from "../Icons/IconNew.svelte"
   import FavoriteButton from "../Buttons/FavoriteButton.svelte"
+  import CompleteButton from "../Buttons/CompleteButton.svelte"
   import IconDragHandle from "../Icons/IconDragHandle.svelte"
   import { onDestroy } from "svelte"
 
@@ -34,6 +35,10 @@
 
   function isFavorited(dle) {
     return $favoriteIds.includes(dle.id)
+  }
+
+  function isCompleted(dle) {
+    return $completedIds.includes(dle.id)
   }
 
   // function groupDlesByTheme(dles) {
@@ -348,6 +353,7 @@
               <span
                 class="dleName"
                 class:with-drag-handle={reorderable && editMode}
+                class:is-complete={isCompleted(dle)}
                 role="button"
                 tabindex="0"
                 on:click={(e) => {
@@ -368,7 +374,13 @@
                 }}
                 on:auxclick={(e) => handleAuxClick(dle, j)}
               >
-                {dle.name}
+                {#if isCompleted(dle) && !editMode}
+                <s>
+                  {dle.name}
+                </s>
+                {:else}
+                  {dle.name}
+                {/if}
               </span>
               {#if isNewDle(dle)}
                 <IconNew />
@@ -380,8 +392,13 @@
               <IconDragHandle />
             </div>
           {:else}
-            <div class="hover-favorite" class:favorited={isFavorited(dle)}>
-              <FavoriteButton {dle} {section} position={j} size="small" />
+            <div class="dleRight">
+              <div class="hover-complete" class:completed={isCompleted(dle)}>
+                <CompleteButton {dle} {section} position={j} size="small" />
+              </div>
+              <div class="hover-favorite" class:favorited={isFavorited(dle)}>
+                <FavoriteButton {dle} {section} position={j} size="small" />
+              </div>
             </div>
           {/if}
         </div>
@@ -445,6 +462,10 @@
     @apply flex items-center gap-1;
   }
 
+  .dleRight {
+    @apply flex items-center gap-1;
+  }
+
   .drag-handle {
     @apply text-colorTextSofter transition-colors flex items-center flex-shrink-0;
   }
@@ -460,6 +481,14 @@
 
   .dleName.with-drag-handle {
     @apply cursor-move;
+  }
+
+  .dleName.is-complete {
+    @apply text-gray-500 no-underline
+  }
+
+  .dleName.dleName.is-complete:hover {
+    @apply underline decoration-gray-500
   }
 
   /* Different hover color in edit mode */
@@ -488,8 +517,20 @@
     @apply opacity-100;
   }
 
+  .hover-complete {
+    @apply opacity-0 transition-opacity duration-200 flex items-center flex-shrink-0;
+  }
+
+  .dleContainer:hover .hover-complete {
+    @apply opacity-100;
+  }
+
+
   @media (max-width: 768px) {
     .hover-favorite {
+      @apply opacity-100;
+    }
+    .hover-complete {
       @apply opacity-100;
     }
   }

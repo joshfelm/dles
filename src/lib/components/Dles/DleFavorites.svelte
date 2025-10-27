@@ -1,13 +1,16 @@
 <script>
-  import { favorites, favoriteIds, categoryColors, dles } from "$lib/stores"
+  import { favorites, completed, favoriteIds, completedIds, categoryColors, dles } from "$lib/stores"
   import { playRandom } from "$lib/js/utilities"
   import { categoryIcons } from "$lib/js/categoryIcons"
   import IconRandom from "$lib/components/Icons/IconRandom.svelte"
   import FavoriteButton from "$lib/components/Buttons/FavoriteButton.svelte"
   import SearchModal from "$lib/components/Dles/SearchModal.svelte"
+  import IconCompleteOutline from "../Icons/IconCompleteOutline.svelte"
+  import IconIncomplete from "../Icons/IconIncomplete.svelte"
   import { onMount } from "svelte"
   import { base } from "$app/paths"
   import { useTracking } from "$lib/composables/useTracking"
+  import CompleteButton from "../Buttons/CompleteButton.svelte"
 
   let loading = true
   let showSearchModal = false
@@ -42,13 +45,14 @@
   }
 
   function handlePlayRandomFavorite() {
+    let options = $favorites.filter(obj => !$completed.includes(obj))
     const customTrackingData = {
-      click_type: 'random-button-favorites',
-      source: 'favorites-page',
-      section: 'favorites-dedicated',
-      available_options: $favorites.length
-    };
-    playRandom($favorites, customTrackingData);
+      click_type: "random-button-favorites",
+      source: "main-page",
+      section: "favorites",
+      available_options: options.length,
+    }
+    playRandom(options, customTrackingData)
   }
 
   function openSearchModal(event) {
@@ -97,7 +101,7 @@
 
     <div class="flex justify-center my-4">
       <button class="btn-dropdown-menu" on:click={handlePlayRandomFavorite}>
-        <IconRandom /> Play random favorite!</button
+        <IconRandom /> Play random incomplete favorite!</button
       >
     </div>
   {/if}
@@ -117,16 +121,17 @@
             <div class="flex justify-between">
               <div>
                 <div>
-                  <div class="text-lg font-semibold leading-5">
+                  <div class="text-lg font-semibold leading-5" class:fav-complete={$completedIds.includes(favorite.id)}>
                     {favorite.name}
                   </div>
-                  <a class="text-base" target="_blank" href={favorite.url} on:click={() => handleGameUrlClick(favorite)}
+                  <a class="text-base" target="_blank" href={favorite.url} class:url-complete={$completedIds.includes(favorite.id)} on:click={() => handleGameUrlClick(favorite)}
                     >{favorite.url}</a
                   >
                 </div>
                 <!-- <div class="text-sm leading-4">{favorite.description}</div> -->
               </div>
-              <div class="p-2 flex justify-center items-center">
+              <div class="p-2 flex justify-center items-center gap-2">
+                <CompleteButton dle={favorite} />
                 <FavoriteButton dle={favorite} />
               </div>
             </div>
@@ -150,5 +155,14 @@
   } */
   .card {
     @apply [&:nth-child(odd)]:bg-colorCardB [&:nth-child(even)]:bg-colorCardA;
+  }
+  .fav-complete {
+    @apply line-through text-gray-500
+  }
+  .url-complete {
+    @apply text-gray-500
+  }
+  .url-complete:hover {
+    @apply text-green-200 underline
   }
 </style>

@@ -1,8 +1,10 @@
 <script>
   import { poppedUpDle } from "$lib/stores"
   import { useTracking } from "$lib/composables/useTracking.js"
+  import { useCompletes } from "$lib/composables/useCompletes.js"
   import IconClose from "../Icons/IconClose.svelte"
   import DleFavorite from "../Buttons/FavoriteButton.svelte"
+  import DleCompleted from "../Buttons/CompleteButton.svelte"
   import { clickOutside } from "$lib/js/clickOutside"
 
   export let dle, pageX, pageY, clientY, handleClickOutside
@@ -10,6 +12,7 @@
   export let position = null
 
   const tracking = useTracking()
+  const completed = useCompletes()
 
   function trackGameClick(dle, clickType) {
     if (section === 'sponsors') {
@@ -17,6 +20,7 @@
     } else {
       tracking.trackGameClick(dle, clickType, 'popup', section, position)
     }
+    completed.addToCompleted(dle)
   }
 
   let width = 310
@@ -68,9 +72,12 @@
     {dle.description}
   </div>
 
-  <a href={dle.url} target="_blank" on:click={() => trackGameClick(dle, 'popup-link')} on:auxclick={() => trackGameClick(dle, 'popup-middle-click')}>
-    {dle.url}
-  </a>
+  <div class="text-center flex justify-center gap-2">
+    <DleCompleted {dle} {section} {position} size="icon" />
+    <a class:is-completed={completed.isCompleted(dle)} href={dle.url} target="_blank" on:click={() => trackGameClick(dle, 'popup-link')} on:auxclick={() => trackGameClick(dle, 'popup-middle-click')}>
+      {dle.url}
+    </a>
+  </div>
 </div>
 
 <style lang="postcss">
@@ -81,5 +88,13 @@
 
   a {
     @apply text-center text-base underline break-words;
+  }
+
+  a.is-completed {
+    @apply text-gray-500
+  }
+
+  a.is-completed:hover {
+    @apply text-green-200
   }
 </style>

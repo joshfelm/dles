@@ -33,6 +33,37 @@ export function useTracking() {
     }
   }
 
+  function trackCompleteAction(dle, action, type, section, position) {
+    try {
+      if (typeof window === 'undefined' || !window.umami) {
+        return false
+      }
+
+      // Use createTrackingData for dles-of-the-week to get position_id
+      const baseTrackingData = createTrackingData(dle, action, type, section, position)
+
+      // Override with favorite-specific fields
+      const trackingData = {
+        dle_name: baseTrackingData.dle_name,
+        dle_id: baseTrackingData.dle_id,
+        action: action,
+        section: baseTrackingData.section
+      }
+
+      // Add position_id only for dles-of-the-week
+      if (baseTrackingData.position_id) {
+        trackingData.position_id = baseTrackingData.position_id
+      }
+
+      trackEvent('completion-action', trackingData, `${type} ${action}`)
+
+      return true
+    } catch (error) {
+      console.error('Failed to track completion action:', error)
+      return false
+    }
+  }
+
   function trackGameClick(dle, clickType, source, section, position) {
     try {
       if (typeof window === 'undefined' || !window.umami) {
@@ -82,6 +113,7 @@ export function useTracking() {
 
   return {
     trackFavoriteAction,
+    trackCompleteAction,
     trackGameClick,
     trackSponsorClick,
     isTrackingAvailable

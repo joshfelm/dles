@@ -14,11 +14,13 @@
     dles,
     newDles,
     favoriteIds,
+    completedIds,
     filteredDles,
     randomCategories,
     dlesOfTheWeek,
   } from "$lib/stores"
 
+  import { useCompletes } from "$lib/composables/useCompletes.js"
   import Header from "$lib/components/Header.svelte"
   import { onMount, setContext } from "svelte"
   import { writable } from "svelte/store"
@@ -34,6 +36,19 @@
   } from "$lib/js/favoritesMigration"
   import LatestChange from "$lib/components/LatestChange.svelte"
 
+  const completed = useCompletes()
+
+  let lastDleResetDate = null;
+
+  function checkAndResetDles() {
+    const today = new Date().toDateString();
+
+    if (lastDleResetDate !== today) {
+      completed.resetCompleted()
+      localStorage.setItem('lastDleResetDate', today)
+    }
+  }
+
   onMount(() => {
     if (isLocalStorageAvailable()) {
       if (localStorage.randomCategories) {
@@ -42,6 +57,7 @@
         $randomCategories = $categories
       }
       const rawFavorites = JSON.parse(localStorage.favorites || "[]")
+      const rawCompletes = JSON.parse(localStorage.completed || "[]")
 
       // Check if migration is needed
       if (needsFavoritesMigration(rawFavorites)) {
@@ -69,8 +85,15 @@
         }
       } else {
         $favoriteIds = rawFavorites
+        $completedIds = rawCompletes
       }
     }
+
+    // check and reset completed dles
+    lastDleResetDate = localStorage.getItem('lastDleResetDate');
+    checkAndResetDles();
+    const interval = setInterval(checkAndResetDles, 60000); // 60 second check
+    return () => clearInterval(interval);
   })
 
   function initializeDles() {

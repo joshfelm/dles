@@ -6,6 +6,7 @@
     newDles,
     poppedUpDle,
     dlesOfTheWeek,
+    completed,
     favorites,
     favoriteIds,
     searchQuery,
@@ -42,13 +43,14 @@
   const tracking = useTracking()
 
   function handlePlayRandomFavorite() {
+    let options = $favorites.filter(obj => !$completed.includes(obj))
     const customTrackingData = {
       click_type: "random-button-favorites",
       source: "main-page",
       section: "favorites",
-      available_options: $favorites.length,
+      available_options: options.length,
     }
-    playRandom($favorites, customTrackingData)
+    playRandom(options, customTrackingData)
   }
 
   function toggleFavoritesSort() {
@@ -193,6 +195,7 @@
   $: {
     $dlesOfTheWeek
     $favorites
+    $completed
     $categorizedDles
     $categories
     buildCards()
@@ -264,7 +267,7 @@
                 <button
                   class="favorites-random-button"
                   on:click={handlePlayRandomFavorite}
-                  title="Play random favorite"
+                  title="Play random incomplete favorite"
                 >
                   <div class="icon-container">
                     <IconRandom />

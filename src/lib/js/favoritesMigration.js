@@ -170,6 +170,16 @@ export function getFavoritesFromIds(favoriteIds, filteredDles) {
     .filter(Boolean)
 }
 
+export function getCompletedFromIds(completedIds, filteredDles) {
+  if (!Array.isArray(completedIds) || !Array.isArray(filteredDles)) {
+    return []
+  }
+
+  return completedIds
+    .map(id => filteredDles.find(dle => dle.id === id))
+    .filter(Boolean)
+}
+
 export function needsFavoritesMigration(favorites) {
   if (!Array.isArray(favorites) || favorites.length === 0) {
     return false
