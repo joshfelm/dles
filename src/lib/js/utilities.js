@@ -9,7 +9,10 @@ export function isLocalStorageAvailable() {
   }
 }
 
+import { get } from 'svelte/store';
+import { settings } from '$lib/stores';
 import { trackEvent } from './trackingUtils.js';
+import { useCompletes } from "$lib/composables/useCompletes.js"
 
 export function openInNewTab(href, trackingData = null) {
   if (trackingData) {
@@ -38,6 +41,7 @@ export function openInNewTab(href, trackingData = null) {
 export function playRandom(options, customTrackingData = null) {
   if (options.length != 0) {
     const choice = options[Math.floor(Math.random() * options.length)]
+    const completed = useCompletes()
 
     const trackingData = customTrackingData || {
       dle_name: choice.name,
@@ -51,6 +55,11 @@ export function playRandom(options, customTrackingData = null) {
       trackingData.dle_id = choice.id;
     }
 
+    let currentSettings = get(settings)
+
+    if (currentSettings.autoComplete == "On Visit") {
+      completed.addToCompleted(choice)
+    }
     openInNewTab(choice.url, trackingData)
   }
 }
