@@ -1,4 +1,5 @@
 <script>
+  import { useCompletes } from "$lib/composables/useCompletes"
   import { settings } from "$lib/stores"
   import { onMount } from "svelte"
   import ThemeButton from "./Buttons/ThemeButton.svelte"
@@ -7,6 +8,8 @@
   import { base } from "$app/paths"
   import IconFavoriteOutline from "./Icons/IconFavoriteOutline.svelte"
   import IconCompleteOutline from "./Icons/IconCompleteOutline.svelte"
+
+  const completed = useCompletes()
 
   onMount(() => {
     if (isLocalStorageAvailable()) {
@@ -42,6 +45,10 @@
     $settings.autoComplete = $settings.autoComplete === "On Visit" ? "Manual Only" : "On Visit"
     updateLocalStorage()
   }
+
+  function clearAllComplete() {
+    completed.resetCompleted()
+  }
 </script>
 
 <ThemeButton />
@@ -58,6 +65,11 @@
   <button on:click={toggleAutoComplete} class="flex justify-center items-center gap-1 btn-menu-item">
     <IconCompleteOutline />
     Mark complete: { $settings.autoComplete }
+  </button>
+</div>
+<div class="flex justify-center items-center gap-1">
+  <button on:click={clearAllComplete} class="flex justify-center items-center gap-1 btn-menu-item">
+    Clear all completed
   </button>
 </div>
 <div data-sveltekit-reload class="flex justify-center items-center gap-1">
