@@ -1,5 +1,5 @@
 <script>
-  import { poppedUpDle } from "$lib/stores"
+  import { poppedUpDle, settings } from "$lib/stores"
   import { useTracking } from "$lib/composables/useTracking.js"
   import { useCompletes } from "$lib/composables/useCompletes.js"
   import IconClose from "../Icons/IconClose.svelte"
@@ -20,7 +20,9 @@
     } else {
       tracking.trackGameClick(dle, clickType, 'popup', section, position)
     }
-    completed.addToCompleted(dle)
+    if ($settings.autoComplete == "On Visit") {
+      completed.addToCompleted(dle)
+    }
   }
 
   let width = 310
