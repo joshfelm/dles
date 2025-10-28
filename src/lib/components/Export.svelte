@@ -15,16 +15,48 @@
   let invalidCode = false;
   let codeEntered = false;
   let addedFavorites = 0;
+  let copyError = false
 
   const faves = useFavorites()
 
   async function copyToClipboard() {
     const text = $favorites.map(fav => fav.id.toString(36).padStart(3, '0')).join('');
-    await navigator.clipboard.writeText(text);
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          handleCopySuccess()
+        })
+        .catch(() => {
+          copyError = true;
+          console.error("Copy failed")
+        })
+    } else {
+      fallbackCopyTextToClipboard(text);
+    }
+  }
+
+  function fallbackCopyTextToClipboard(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+      document.execCommand('copy');
+      handleCopySuccess(text);
+    } catch (err) {
+      copyError = true;
+      console.error("Copy failed", err);
+    }
+
+    document.body.removeChild(textarea);
+  }
+
+  function handleCopySuccess(text) {
     copied = true;
-    setTimeout(() => {
-      copied = false;
-    }, 5000);
+    setTimeout(() => copied = false, 5000);
   }
 
   function openImportModal(event) {
@@ -121,6 +153,8 @@
     {#if copied}
       <IconCopied />
       Copied to clipboard!
+    {:else if copyError}
+      Error when copying
     {:else}
       <IconCopy />
       Export favorites to clipboard
