@@ -209,15 +209,4 @@
     width: 80%;
     max-width: 300px;
   }
-
-  .response-container {
-    @apply flex-1 overflow-y-auto;
-    min-height: 0; /* Important for flex child to shrink */
-  }
-
-  .response-item {
-    @apply flex items-center justify-between p-2 pr-4 rounded cursor-pointer border-none w-full text-left;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-
 </style>

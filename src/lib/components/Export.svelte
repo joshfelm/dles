@@ -193,8 +193,8 @@
 <svelte:window on:keydown={handleKeydown} />
 
 <style lang="postcss">
-  button,
-  a {
+  button
+  {
     @apply !p-2 w-full text-center rounded-md !bg-colorCardA;
   }
 
